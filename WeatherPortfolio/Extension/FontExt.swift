@@ -43,4 +43,11 @@ extension UIFont {
         }
     }
     
+    static var extraSmallTitle: UIFont {
+        get {
+            return UIFont(descriptor: UIFont.systemFont(ofSize: 13, weight: .regular).fontDescriptor.withDesign(.rounded)!,
+                          size: 13)
+        }
+    }
+    
 }

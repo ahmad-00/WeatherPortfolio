@@ -36,6 +36,11 @@ class MainView: UIViewController {
         setupView()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -56,7 +61,7 @@ class MainView: UIViewController {
         
         view.addSubview(todayLabel)
         NSLayoutConstraint.activate([
-            todayLabel.topAnchor.constraint(equalTo: todayView.bottomAnchor),
+            todayLabel.topAnchor.constraint(equalTo: todayView.bottomAnchor, constant: 8),
             todayLabel.heightAnchor.constraint(lessThanOrEqualToConstant: 28),
             todayLabel.leadingAnchor.constraint(equalTo: todayView.leadingAnchor),
             todayLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 200)

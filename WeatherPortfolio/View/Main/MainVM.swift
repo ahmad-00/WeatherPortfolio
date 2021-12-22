@@ -25,6 +25,7 @@ class MainVM: NSObject {
                 guard let `self` = self else {return}
                 if let location = _location {
                     self.getWeatherInfo(lat: location.lat, lng: location.lng)
+                    self.locationCancelable?.cancel()
                 }
             }
         
@@ -62,12 +63,13 @@ extension MainVM: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: hourlyCollectionCellIdentifier, for: indexPath) as? HourlyCollectionCell else {
             return UICollectionViewCell()
         }
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.height * 0.5,
-                      height: collectionView.frame.height * 0.9)
+        return CGSize(width: collectionView.frame.height * 0.7,
+                      height: collectionView.frame.height)
     }
     
 }

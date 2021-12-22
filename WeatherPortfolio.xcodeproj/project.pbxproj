@@ -27,7 +27,6 @@
 		D2C3D1CD276EA6EB0091C95C /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C3D1CC276EA6EB0091C95C /* LocationManager.swift */; };
 		D2C3D1CF276EAF0C0091C95C /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C3D1CE276EAF0C0091C95C /* Location.swift */; };
 		D2C3D1D1276F25D00091C95C /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C3D1D0276F25D00091C95C /* TodayView.swift */; };
-		D2C3D1D3276F2B4C0091C95C /* WeatherDetailStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C3D1D2276F2B4C0091C95C /* WeatherDetailStack.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,7 +71,6 @@
 		D2C3D1CC276EA6EB0091C95C /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		D2C3D1CE276EAF0C0091C95C /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		D2C3D1D0276F25D00091C95C /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
-		D2C3D1D2276F2B4C0091C95C /* WeatherDetailStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherDetailStack.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,7 +160,6 @@
 		D20D9E4E277357EC0043F8BD /* Subview */ = {
 			isa = PBXGroup;
 			children = (
-				D2C3D1D2276F2B4C0091C95C /* WeatherDetailStack.swift */,
 				D2C3D1D0276F25D00091C95C /* TodayView.swift */,
 				D2167064276CE87C00E1FD66 /* HourlyCV.swift */,
 				D2167066276D03B600E1FD66 /* HourlyCollectionCell.swift */,
@@ -361,7 +358,6 @@
 				D29429EA276E1E6E0045C8E2 /* RequestManager.swift in Sources */,
 				D2167069276D083B00E1FD66 /* Statics.swift in Sources */,
 				D2167063276CE55E00E1FD66 /* FontExt.swift in Sources */,
-				D2C3D1D3276F2B4C0091C95C /* WeatherDetailStack.swift in Sources */,
 				D2167034276CD78D00E1FD66 /* WeatherPortfolio.xcdatamodeld in Sources */,
 				D2C3D1D1276F25D00091C95C /* TodayView.swift in Sources */,
 				D2C3D1CD276EA6EB0091C95C /* LocationManager.swift in Sources */,
