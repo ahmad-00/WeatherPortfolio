@@ -17,11 +17,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     static var shared = LocationManager()
     
     override init() {
+        logger.debug("Did Init Location Manager")
         super.init()
+        locationManager.delegate = self
+        checkLocationAuthorizationStatus()
     }
     
     func checkLocationAuthorizationStatus() {
-        if locationManager.authorizationStatus != .authorizedWhenInUse {
+        if locationManager.authorizationStatus != .authorizedWhenInUse || locationManager.authorizationStatus != .authorizedAlways {
             locationManager.requestWhenInUseAuthorization()
         } else {
             locationManager.startUpdatingLocation()
@@ -40,6 +43,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        logger.debug("Did Received location")
         let location: Location = Location(
             lat: locations[0].coordinate.latitude,
             lng: locations[0].coordinate.longitude

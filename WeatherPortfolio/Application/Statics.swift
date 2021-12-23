@@ -6,7 +6,11 @@
 //
 
 import Foundation
+import UIKit
+import os
 
 let hourlyCollectionCellIdentifier = "hourlyCollectionCellIdentifier"
 
 let API_KEY = "97a0c5beffd8c9d0fb7c0aa19bd84c3b"
+
+let logger = Logger()

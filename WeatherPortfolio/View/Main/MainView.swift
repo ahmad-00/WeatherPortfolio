@@ -79,16 +79,15 @@ class MainView: UIViewController {
         ])
         
         viewModel
-            .weatherInfo
+            .weatherInfoWitLocation
             .receive(on: RunLoop.main)
-            .compactMap({$0})
-            .sink(receiveValue: {[weak self] weather in
+            .sink(receiveValue: {[weak self] _ in
+                logger.debug("Did Receive weather update on MainView")
                 guard let `self` = self else {return}
                 self.hourlyCV.reloadData()
             })
             .store(in: &cancelable)
-        
-        
+
         
     }
     

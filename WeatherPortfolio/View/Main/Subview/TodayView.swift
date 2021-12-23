@@ -10,6 +10,8 @@ import Combine
 
 class TodayView: UIView {
     
+    private var cancelable = Set<AnyCancellable>()
+    
     private var backIV: UIImageView = {
         let iv = UIImageView(image: UIImage(named: "blueBack"))
         iv.contentMode = .scaleToFill
@@ -106,9 +108,13 @@ class TodayView: UIView {
         return vi
     }()
     
+    private var viewModel: MainVM
+    
     init(viewModel: inout MainVM) {
+        self.viewModel = viewModel
         super.init(frame: .zero)
         setupView()
+        initSubscribers()
     }
     
     required init?(coder: NSCoder) {
@@ -125,8 +131,8 @@ class TodayView: UIView {
         ])
         backIV.layer.shadowColor = UIColor(red: 94/255, green: 153/255, blue: 231/255, alpha: 1).cgColor
         backIV.layer.shadowOffset = CGSize(width: 0, height: 1)
-        backIV.layer.shadowRadius = 8
-        backIV.layer.shadowOpacity = 0.8
+        backIV.layer.shadowRadius = 5
+        backIV.layer.shadowOpacity = 0.6
         
         
         detailsStack.addArrangedSubview(windView)
@@ -149,12 +155,6 @@ class TodayView: UIView {
             detailsStack.heightAnchor.constraint(equalToConstant: 70)
         ])
         
-        currentLocationLbl.text = "Istanbul"
-        mainIconIV.image = UIImage(named: "test")
-        currentTemp.text = "21"
-        currentWeatherStatusLbl.text = "Rain"
-        
-        
         backIV.addSubview(containerStack)
         NSLayoutConstraint.activate([
             containerStack.topAnchor.constraint(equalTo: backIV.topAnchor, constant: 12),
@@ -163,6 +163,28 @@ class TodayView: UIView {
             containerStack.trailingAnchor.constraint(equalTo: backIV.trailingAnchor, constant: -16)
         ])
         
+    }
+    
+    private func initSubscribers() {
+        viewModel
+            .weatherInfoWitLocation
+            .receive(on: RunLoop.main)
+            .compactMap({$0})
+            .sink {[weak self] weatherLocationInfo in
+                logger.debug("=-=-=Did Received Weather Info=-=-=")
+                guard let `self` = self else {return}
+                
+                let weatherInfo = weatherLocationInfo.0
+                let locationInfo = weatherLocationInfo.1
+                
+                self.currentLocationLbl.text = locationInfo
+                self.currentTemp.text = String(Int(weatherInfo.current?.temp ?? Double()))
+                self.currentWeatherStatusLbl.text = weatherInfo.current?.weather?[0].weatherDescription ?? ""
+                self.windView.value = "\(weatherInfo.current?.windSpeed ?? Double())km/h"
+                self.humidityView.value = "\(weatherInfo.current?.humidity ?? 0)%"
+                self.rainChanceView.value = "N/A"
+            }
+            .store(in: &cancelable)
     }
     
     override func layoutSubviews() {

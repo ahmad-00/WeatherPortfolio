@@ -19,6 +19,7 @@ struct Weather: Codable {
 
 // MARK: - Current
 struct CurrentInfo: Codable {
+    let dt: Int?
     let temp, feelsLike: Double?
     let pressure, humidity: Int?
     let uvi: Double?
@@ -28,6 +29,7 @@ struct CurrentInfo: Codable {
     let weather: [CurrentWeather]?
 
     enum CodingKeys: String, CodingKey {
+        case dt
         case temp
         case feelsLike = "feels_like"
         case pressure, humidity

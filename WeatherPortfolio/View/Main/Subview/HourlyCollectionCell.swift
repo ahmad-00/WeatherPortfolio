@@ -9,6 +9,15 @@ import UIKit
 
 class HourlyCollectionCell: UICollectionViewCell {
     
+    var weatherInfo: CurrentInfo? = nil {
+        didSet {
+            if let info = self.weatherInfo {
+                topLbl.text = "\(Int(info.temp ?? Double()))º"
+                bottomLbl.text = info.dt!.timestampToHour()
+            }
+        }
+    }
+    
     private var containerStack: UIStackView = {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -44,15 +53,6 @@ class HourlyCollectionCell: UICollectionViewCell {
         return lbl
     }()
     
-    lazy var backImageView: UIImageView = {
-        let iv = UIImageView(image: UIImage(named: "blueBack"))
-        iv.contentMode = .scaleToFill
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    
-    private var isCurrent: Bool = true
-    
     override init(frame: CGRect) {
         super.init(frame: .zero)
         setupView()
@@ -67,21 +67,8 @@ class HourlyCollectionCell: UICollectionViewCell {
         layer.cornerRadius = 20
         clipsToBounds = true
         
-        
-        if isCurrent {
-            contentView.addSubview(backImageView)
-            NSLayoutConstraint.activate([
-                backImageView.topAnchor.constraint(equalTo: topAnchor),
-                backImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-                backImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                backImageView.trailingAnchor.constraint(equalTo: trailingAnchor)
-            ])
-            layer.borderColor = UIColor.white.cgColor
-            layer.borderWidth = 0.5
-        } else {
-            layer.borderColor = UIColor.white.withAlphaComponent(0.6).cgColor
-            layer.borderWidth = 0.5
-        }
+        layer.borderColor = UIColor.white.withAlphaComponent(0.6).cgColor
+        layer.borderWidth = 0.5
         
         containerStack.addArrangedSubview(topLbl)
         containerStack.addArrangedSubview(iconIV)

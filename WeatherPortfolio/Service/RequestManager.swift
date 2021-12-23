@@ -32,11 +32,14 @@ fileprivate enum Endpoint {
 
     case weatherInfo(lat: Double, lng: Double)
     case image(name: String)
+    case geoData(lat: Double, lng: Double)
     
     var url: URL {
         switch self {
         case .weatherInfo(let lat, let lng):
             return URL(string: "https://api.openweathermap.org/data/2.5/onecall?lat=\(lat)&lon=\(lng)&exclude=minutely&appid=\(API_KEY)&units=metric")!
+        case .geoData(let lat, let lng):
+            return URL(string: "https://api.openweathermap.org/geo/1.0/reverse?lat=\(lat)&lon=\(lng)&appid=\(API_KEY)")!
         case .image(let name):
             return URL(string: "http://openweathermap.org/img/wn/\(name)@2x.png")!
         }
@@ -87,5 +90,48 @@ class RequestManager {
                     .resume()
         }
     }
+    
+    func getLocationName(lat: Double, lng: Double) -> Future<GeoData, RequestError> {
+        
+        return Future {promise in
+            URLSession
+                .shared
+                .dataTask(
+                    with: Endpoint.geoData(lat: lat, lng: lng).url) { _data, _response, _error in
+                        
+                        guard let statusCode = (_response as? HTTPURLResponse)?.statusCode else {
+                            promise(.failure(.ConnectionFailed))
+                            return
+                        }
+                        
+                        if statusCode == 429 {
+                            promise(.failure(.RateLimitExceeded))
+                        } else if statusCode == 401 || statusCode == 403 {
+                            promise(.failure(.AuthenticationFailed))
+                        } else if statusCode < 200 || statusCode > 299 {
+                            promise(.failure(.ConnectionFailed))
+                        }
+                        
+                        guard let data = _data else {
+                            promise(.failure(.ConnectionFailed))
+                            return
+                        }
+                        
+                        do {
+                            let jsonDecoder = JSONDecoder()
+                            let geoData = try jsonDecoder.decode([GeoData].self,from: data)
+                            promise(.success(geoData[0]))
+                        } catch {
+                            promise(.failure(.ConnectionFailed))
+                        }
+                    }
+                    .resume()
+        }
+        
+    }
+    
+//    func getWeatherIcon(name: String) -> AnyPublisher<Data, RequestError> {
+//        return URLSession.shared
+//    }
     
 }
