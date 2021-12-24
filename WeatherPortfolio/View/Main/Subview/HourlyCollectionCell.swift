@@ -13,6 +13,7 @@ class HourlyCollectionCell: UICollectionViewCell {
         didSet {
             if let info = self.weatherInfo {
                 topLbl.text = "\(Int(info.temp ?? Double()))º"
+                iconIV.iconName = info.weather?[0].icon
                 bottomLbl.text = info.dt!.timestampToHour()
             }
         }
@@ -37,8 +38,8 @@ class HourlyCollectionCell: UICollectionViewCell {
         return lbl
     }()
     
-    private var iconIV: UIImageView = {
-        let iv = UIImageView()
+    private var iconIV: IconImageView = {
+        let iv = IconImageView()
         iv.translatesAutoresizingMaskIntoConstraints = false
         iv.contentMode = .scaleAspectFit
         return iv
@@ -86,11 +87,6 @@ class HourlyCollectionCell: UICollectionViewCell {
             containerStack.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerStack.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
-        
-        
-        topLbl.text = "23"
-        iconIV.image = UIImage(named: "test")
-        bottomLbl.text = "11:00"
         
     }
     

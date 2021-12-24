@@ -39,8 +39,8 @@ class TodayView: UIView {
         return lbl
     }()
     
-    private var mainIconIV: UIImageView = {
-        let iv = UIImageView()
+    private var mainIconIV: IconImageView = {
+        let iv = IconImageView()
         iv.translatesAutoresizingMaskIntoConstraints = false
         iv.contentMode = .scaleAspectFit
         return iv
@@ -178,6 +178,7 @@ class TodayView: UIView {
                 let locationInfo = weatherLocationInfo.1
                 
                 self.currentLocationLbl.text = locationInfo
+                self.mainIconIV.iconName = weatherInfo.current?.weather?[0].icon
                 self.currentTemp.text = String(Int(weatherInfo.current?.temp ?? Double()))
                 self.currentWeatherStatusLbl.text = weatherInfo.current?.weather?[0].weatherDescription ?? ""
                 self.windView.value = "\(weatherInfo.current?.windSpeed ?? Double())km/h"

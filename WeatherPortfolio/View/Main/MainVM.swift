@@ -111,8 +111,8 @@ extension MainVM: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.height * 0.7,
-                      height: collectionView.frame.height)
+        return CGSize(width: collectionView.frame.height * 0.65,
+                      height: collectionView.frame.height * 0.9)
     }
     
 }

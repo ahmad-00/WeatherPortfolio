@@ -41,7 +41,7 @@ fileprivate enum Endpoint {
         case .geoData(let lat, let lng):
             return URL(string: "https://api.openweathermap.org/geo/1.0/reverse?lat=\(lat)&lon=\(lng)&appid=\(API_KEY)")!
         case .image(let name):
-            return URL(string: "http://openweathermap.org/img/wn/\(name)@2x.png")!
+            return URL(string: "https://openweathermap.org/img/wn/\(name)@4x.png")!
         }
     }
 }
@@ -130,8 +130,12 @@ class RequestManager {
         
     }
     
-//    func getWeatherIcon(name: String) -> AnyPublisher<Data, RequestError> {
-//        return URLSession.shared
-//    }
+    func getWeatherIcon(name: String) -> AnyPublisher<Data?, URLError> {
+        return URLSession
+            .shared
+            .dataTaskPublisher(for: Endpoint.image(name: name).url)
+            .map{$0.data}
+            .eraseToAnyPublisher()
+    }
     
 }
