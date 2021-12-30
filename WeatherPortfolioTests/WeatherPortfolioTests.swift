@@ -22,6 +22,61 @@ class WeatherPortfolioTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+    
+    func testGetWeatherInfo() {
+        
+        let expectation = self.expectation(description: "GetWeatherInfoExpectation")
+        _ = RequestManager
+            .shared
+            .getWeatherInfo(lat: 40.730610, lng: -73.935242)
+            .subscribe(on: DispatchQueue.global(qos: .userInteractive))
+            .receive(on: RunLoop.main)
+            .sink {_result in
+                switch _result {
+                case .failure(_):
+                    XCTFail("Get Weather Info Failed")
+                    expectation.fulfill()
+                    break
+                case .finished:
+                    break
+                }
+                
+            } receiveValue: {_ in
+                expectation.fulfill()
+            }
+
+        self.waitForExpectations(timeout: 10)
+    }
+    
+    func testGetLocationInfo() {
+        
+        let expectation = self.expectation(description: "GetLocationInfoExpectation")
+        
+        _ = RequestManager.shared.getLocationName(lat: 40.730610, lng: -73.935242)
+            .subscribe(on: RunLoop.main)
+            .sink {_result in
+                switch _result {
+                case .failure(_):
+                    XCTFail("Get Weather Info Failed")
+                    expectation.fulfill()
+                    break
+                case .finished:
+                    break
+                }
+            } receiveValue: {geoData in
+                XCTAssertEqual(geoData.name, "New York")
+                XCTAssertEqual(geoData.country, "US")
+                expectation.fulfill()
+            }
+        self.waitForExpectations(timeout: 10)
+    }
+    
+    
+    func testMainViewModel() {
+        let vm = MainVM()
+//        vm.
+        
+    }
 
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
