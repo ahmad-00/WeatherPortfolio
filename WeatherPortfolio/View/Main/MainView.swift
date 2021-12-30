@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class MainView: UIViewController {
+class MainView: UIViewController, TodayViewDelegate {
     
     private var cancelable = Set<AnyCancellable>()
 
@@ -49,6 +49,7 @@ class MainView: UIViewController {
         view.backgroundColor = .backColor
         
         let todayView = TodayView(viewModel: &viewModel)
+        todayView.delegate = self
         todayView.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(todayView)
@@ -91,4 +92,10 @@ class MainView: UIViewController {
         
     }
     
+    func didTapCurrentLocation() {
+        logger.debug("Did Received Delegate")
+        let searchView = SearchView()
+        searchView.modalPresentationStyle = .formSheet
+        present(searchView, animated: true, completion: nil)
+    }
 }

@@ -8,9 +8,15 @@
 import UIKit
 import Combine
 
+protocol TodayViewDelegate {
+    func didTapCurrentLocation()
+}
+
 class TodayView: UIView {
     
     private var cancelable = Set<AnyCancellable>()
+    
+    var delegate: TodayViewDelegate?
     
     private var backIV: UIImageView = {
         let iv = UIImageView(image: UIImage(named: "blueBack"))
@@ -36,6 +42,7 @@ class TodayView: UIView {
         lbl.font = UIFont.mediumSemiBoldTitle
         lbl.textAlignment = .center
         lbl.textColor = .white
+        lbl.isUserInteractionEnabled = true
         return lbl
     }()
     
@@ -134,13 +141,22 @@ class TodayView: UIView {
         backIV.layer.shadowRadius = 5
         backIV.layer.shadowOpacity = 0.6
         
-        
         detailsStack.addArrangedSubview(windView)
         detailsStack.addArrangedSubview(humidityView)
         detailsStack.addArrangedSubview(rainChanceView)
         
+//        current location is separate because button action for some reason was not working inside stackview !!!
+        addSubview(currentLocationLbl)
+        NSLayoutConstraint.activate([
+            currentLocationLbl.topAnchor.constraint(equalTo: backIV.topAnchor, constant: 18),
+            currentLocationLbl.heightAnchor.constraint(equalToConstant: 28),
+            currentLocationLbl.leadingAnchor.constraint(equalTo: backIV.leadingAnchor, constant: 12),
+            currentLocationLbl.trailingAnchor.constraint(equalTo: backIV.trailingAnchor, constant: -12)
+        ])
         
-        containerStack.addArrangedSubview(currentLocationLbl)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(currentLocationLblTapAction))
+        currentLocationLbl.addGestureRecognizer(tapGesture)
+        
         containerStack.addArrangedSubview(mainIconIV)
         containerStack.addArrangedSubview(currentTemp)
         containerStack.addArrangedSubview(currentWeatherStatusLbl)
@@ -148,7 +164,6 @@ class TodayView: UIView {
         containerStack.addArrangedSubview(detailsStack)
         
         NSLayoutConstraint.activate([
-            currentLocationLbl.heightAnchor.constraint(equalToConstant: 26),
             currentWeatherStatusLbl.heightAnchor.constraint(equalToConstant: 30),
             currentTemp.heightAnchor.constraint(equalToConstant: 80),
             separatorLineView.heightAnchor.constraint(equalToConstant: 1),
@@ -157,12 +172,17 @@ class TodayView: UIView {
         
         backIV.addSubview(containerStack)
         NSLayoutConstraint.activate([
-            containerStack.topAnchor.constraint(equalTo: backIV.topAnchor, constant: 12),
+            containerStack.topAnchor.constraint(equalTo: currentLocationLbl.bottomAnchor, constant: 8),
             containerStack.bottomAnchor.constraint(equalTo: backIV.bottomAnchor, constant: -12),
             containerStack.leadingAnchor.constraint(equalTo: backIV.leadingAnchor, constant: 16),
             containerStack.trailingAnchor.constraint(equalTo: backIV.trailingAnchor, constant: -16)
         ])
         
+    }
+    
+    @objc private func currentLocationLblTapAction() {
+        logger.debug("Delegate called")
+        delegate?.didTapCurrentLocation()
     }
     
     private func initSubscribers() {
@@ -191,7 +211,6 @@ class TodayView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         backIV.layer.shadowPath = UIBezierPath(roundedRect: backIV.bounds, cornerRadius: 35).cgPath
-        
     }
     
 }
