@@ -63,9 +63,9 @@ class WeatherPortfolioTests: XCTestCase {
                 case .finished:
                     break
                 }
-            } receiveValue: {geoData in
-                XCTAssertEqual(geoData.name, "New York")
-                XCTAssertEqual(geoData.country, "US")
+            } receiveValue: {reverseGeoData in
+                XCTAssertEqual(reverseGeoData.name, "New York")
+                XCTAssertEqual(reverseGeoData.country, "US")
                 expectation.fulfill()
             }
         self.waitForExpectations(timeout: 10)

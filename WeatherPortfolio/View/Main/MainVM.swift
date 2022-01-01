@@ -86,9 +86,9 @@ class MainVM: NSObject {
                 case .finished:
                     break
                 }
-            } receiveValue: {[weak self] _geoData in
+            } receiveValue: {[weak self] _reverseGeoData in
                 guard let `self` = self else {return}
-                self.currentLocation.send(_geoData.name)
+                self.currentLocation.send(_reverseGeoData.name)
             }
             .store(in: &cancelable)
     }
@@ -115,4 +115,11 @@ extension MainVM: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
                       height: collectionView.frame.height * 0.9)
     }
     
+}
+
+extension MainVM: SearchViewModelDelegate {
+    func didSelectLocation(lat: Double, lng: Double) {
+        getLocationInfo(lat: lat, lng: lng)
+        getWeatherInfo(lat: lng, lng: lng)
+    }
 }
