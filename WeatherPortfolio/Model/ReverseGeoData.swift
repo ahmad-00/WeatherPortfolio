@@ -11,3 +11,5 @@ struct ReverseGeoData: Codable {
     var name: String
     var country: String
 }
+
+typealias ReverseGeoDataResponse = [ReverseGeoData]

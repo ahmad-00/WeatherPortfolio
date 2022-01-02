@@ -12,7 +12,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     
     private let locationManager = CLLocationManager()
     
-    @Published var userLocation: Location? = nil
+    @Published var userLocation: Location?
     
     static var shared = LocationManager()
     

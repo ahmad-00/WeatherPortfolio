@@ -11,88 +11,86 @@ import Combine
 class MainVM: NSObject {
     
     private var cancelable = Set<AnyCancellable>()
-    private var locationCancelable: AnyCancellable?
-    
-    private var weatherInfo = CurrentValueSubject<Weather?, Never>(nil)
-    private var currentLocation = CurrentValueSubject<String?, Never>(nil)
-    
-    var weatherInfoWitLocation = CurrentValueSubject<(Weather, String)?, Never>(nil)
-    
+    let weatherInfoWitLocation = CurrentValueSubject<(Weather, ReverseGeoData)?, Never>(nil)
     private var hourlyWeatherData = [CurrentInfo]()
     
     override init() {
         super.init()
         
-        weatherInfo
-            .zip(currentLocation)
-            .receive(on: RunLoop.main)
-            .filter({$0.0 != nil && $0.1 != nil})
-            .sink {[weak self] (_weatherInfo,_currentLocation) in
-                guard let `self` = self else {return}
-                if let hourlyData = self.weatherInfo.value?.hourly {
-                    self.hourlyWeatherData = hourlyData
-                    
-                }
-                self.weatherInfoWitLocation.send((_weatherInfo!, _currentLocation!))
-            }
-            .store(in: &cancelable)
-        
-        locationCancelable = LocationManager
+        LocationManager
             .shared
             .$userLocation
-            .sink {[weak self] _location in
-                guard let `self` = self else {return}
-                if let location = _location {
-                    logger.debug("Will Call for Weather Info")
-                    self.getWeatherInfo(lat: location.lat, lng: location.lng)
-                    self.getLocationInfo(lat: location.lat, lng: location.lng)
-                    self.locationCancelable?.cancel()
-                }
+            .drop(while: { $0 == nil })
+            .compactMap{ $0 }
+            .first()
+            .flatMap { _locationData in
+                RequestManager
+                    .shared
+                    .getWeatherInfo(lat: _locationData.lat, lng: _locationData.lng)
+                    .zip(
+                        RequestManager
+                            .shared
+                            .getLocationName(lat: _locationData.lat, lng: _locationData.lng)
+                    )
             }
-    }
-    
-    func getWeatherInfo(lat: Double, lng: Double) {
-        logger.debug("Did call get weather Info")
-        RequestManager.shared.getWeatherInfo(lat: lat, lng: lng)
-            .subscribe(on: DispatchQueue.global(qos: .userInteractive))
             .receive(on: RunLoop.main)
-            .sink {_result in
+            .sink(receiveCompletion: { _result in
+                
                 switch _result {
                 case .failure(let error):
-                    print(error)
-                    break
+                    print("=-=-=-", error.localizedDescription)
                 case .finished:
                     break
                 }
                 
-            } receiveValue: {[weak self] _weather in
+            }, receiveValue: {[weak self] _value in
                 guard let `self` = self else {return}
-                self.weatherInfo.send(_weather)
-            }
+                logger.debug("Received weatherInfoWitLocation => \(_value.1.name)")
+                self.weatherInfoWitLocation.send(_value)
+                if let hourlyData = _value.0.hourly {
+                    self.hourlyWeatherData = hourlyData
+                }
+            })
             .store(in: &cancelable)
+
+        
+        
     }
-    
-    func getLocationInfo(lat: Double, lng: Double) {
-        logger.debug("Did call get Location Info")
-        RequestManager.shared.getLocationName(lat: lat, lng: lng)
-            .subscribe(on: RunLoop.main)
-            .sink {[weak self] _result in
-                guard let `self` = self else {return}
+
+    private func fetchNewLocationWeatherData(locationData:Location) {
+        Publishers.Zip (
+            RequestManager
+                .shared
+                .getWeatherInfo(lat: locationData.lat, lng: locationData.lng),
+            RequestManager
+                .shared
+                .getLocationName(lat: locationData.lat, lng: locationData.lng)
+        )
+            .map { _weatherInfo, _locationName in
+                (_weatherInfo, _locationName)
+            }
+            .receive(on: RunLoop.main)
+            .sink(receiveCompletion: { _result in
+                
                 switch _result {
                 case .failure(let error):
-                    print(error)
-                    self.currentLocation.send(nil) // send nil data to make drop until consistant. Without this in case of error Weather info and Location name may not be for the same coordinate
-                    break
+                    print("=-=-=-", error.localizedDescription)
                 case .finished:
                     break
                 }
-            } receiveValue: {[weak self] _reverseGeoData in
+                
+            }, receiveValue: {[weak self] _value in
                 guard let `self` = self else {return}
-                self.currentLocation.send(_reverseGeoData.name)
-            }
+                logger.debug("Received weatherInfoWitLocation => \(_value.1.name)")
+                if let hourlyData = _value.0.hourly {
+                    self.hourlyWeatherData = hourlyData
+                }
+                self.weatherInfoWitLocation.send(_value)
+            })
             .store(in: &cancelable)
+        
     }
-    
+
 }
 
 
@@ -119,7 +117,6 @@ extension MainVM: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 
 extension MainVM: SearchViewModelDelegate {
     func didSelectLocation(lat: Double, lng: Double) {
-        getLocationInfo(lat: lat, lng: lng)
-        getWeatherInfo(lat: lng, lng: lng)
+        fetchNewLocationWeatherData(locationData: Location(lat: lat, lng: lng))
     }
 }

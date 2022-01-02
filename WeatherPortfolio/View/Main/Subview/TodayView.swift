@@ -197,7 +197,7 @@ class TodayView: UIView {
                 let weatherInfo = weatherLocationInfo.0
                 let locationInfo = weatherLocationInfo.1
                 
-                self.currentLocationLbl.text = locationInfo
+                self.currentLocationLbl.text = locationInfo.name
                 self.mainIconIV.iconName = weatherInfo.current?.weather?[0].icon
                 self.currentTemp.text = String(Int(weatherInfo.current?.temp ?? Double()))
                 self.currentWeatherStatusLbl.text = weatherInfo.current?.weather?[0].weatherDescription ?? ""

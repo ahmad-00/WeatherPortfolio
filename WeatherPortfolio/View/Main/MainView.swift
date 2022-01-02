@@ -81,6 +81,7 @@ class MainView: UIViewController, TodayViewDelegate {
         
         viewModel
             .weatherInfoWitLocation
+            .compactMap({$0})
             .receive(on: RunLoop.main)
             .sink(receiveValue: {[weak self] _ in
                 logger.debug("Did Receive weather update on MainView")

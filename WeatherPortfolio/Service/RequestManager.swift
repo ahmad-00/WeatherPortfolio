@@ -57,88 +57,6 @@ class RequestManager {
     
     public static let shared = RequestManager()
     
-    func getWeatherInfo(lat: Double, lng: Double) -> Future<Weather, RequestError> {
-        return Future {promise in
-            URLSession
-                .shared
-                .dataTask(
-                    with: Endpoint.weatherInfo(lat: lat, lng: lng).url) { _data, _response, _error in
-                        
-                        guard let statusCode = (_response as? HTTPURLResponse)?.statusCode else {
-                            promise(.failure(.ConnectionFailed))
-                            return
-                        }
-                        
-                        if statusCode == 429 {
-                            promise(.failure(.RateLimitExceeded))
-                        } else if statusCode == 401 || statusCode == 403 {
-                            promise(.failure(.AuthenticationFailed))
-                        } else if statusCode < 200 || statusCode > 299 {
-                            promise(.failure(.ConnectionFailed))
-                        }
-                        
-                        guard let data = _data else {
-                            promise(.failure(.ConnectionFailed))
-                            return
-                        }
-                        
-                        do {
-                            let jsonDecoder = JSONDecoder()
-                            let weather = try jsonDecoder.decode(Weather.self,from: data)
-                            promise(.success(weather))
-                        } catch {
-                            promise(.failure(.ConnectionFailed))
-                        }
-                    }
-                    .resume()
-        }
-    }
-    
-    func getLocationName(lat: Double, lng: Double) -> Future<ReverseGeoData, RequestError> {
-        
-        return Future {promise in
-            URLSession
-                .shared
-                .dataTask(
-                    with: Endpoint.reverseGeoData(lat: lat, lng: lng).url) { _data, _response, _error in
-                        
-                        guard let statusCode = (_response as? HTTPURLResponse)?.statusCode else {
-                            promise(.failure(.ConnectionFailed))
-                            return
-                        }
-                        
-                        if statusCode == 429 {
-                            promise(.failure(.RateLimitExceeded))
-                        } else if statusCode == 401 || statusCode == 403 {
-                            promise(.failure(.AuthenticationFailed))
-                        } else if statusCode < 200 || statusCode > 299 {
-                            promise(.failure(.ConnectionFailed))
-                        }
-                        
-                        guard let data = _data else {
-                            promise(.failure(.ConnectionFailed))
-                            return
-                        }
-                        
-                        do {
-                            let jsonDecoder = JSONDecoder()
-                            let reverseGeoData = try jsonDecoder.decode([ReverseGeoData].self,from: data)
-                            
-                            if reverseGeoData.isEmpty {
-                                promise(.failure(.ConnectionFailed))
-                                return
-                            }
-                            
-                            promise(.success(reverseGeoData[0]))
-                        } catch {
-                            promise(.failure(.ConnectionFailed))
-                        }
-                    }
-                    .resume()
-        }
-        
-    }
-    
     func getWeatherIcon(name: String) -> AnyPublisher<Data?, URLError> {
         return URLSession
             .shared
@@ -177,7 +95,72 @@ class RequestManager {
                 return RequestError.ConnectionFailed
             })
             .eraseToAnyPublisher()
+
+    }
+    
+    
+    func getWeatherInfo(lat: Double, lng: Double) -> AnyPublisher<Weather, RequestError> {
+        
+        URLSession
+            .shared
+            .dataTaskPublisher(for: Endpoint.weatherInfo(lat: lat, lng: lng).url)
+            .tryMap { (_data, _response) in
+                guard let statusCode = (_response as? HTTPURLResponse)?.statusCode else {
+                    throw RequestError.ConnectionFailed
+                }
+                
+                if statusCode == 429 {
+                    throw RequestError.RateLimitExceeded
+                } else if statusCode == 401 || statusCode == 403 {
+                    throw RequestError.AuthenticationFailed
+                } else if statusCode < 200 || statusCode > 299 {
+                    throw RequestError.ConnectionFailed
+                }
+                
+                return _data
+            }
+            .decode(type: Weather.self, decoder: JSONDecoder())
+            .mapError { _urlError -> RequestError in
+                if let error = _urlError as? RequestError {
+                    return error
+                }
+                return RequestError.ConnectionFailed
+            }
+            .eraseToAnyPublisher()
         
     }
+    
+    func getLocationName(lat: Double, lng: Double) -> AnyPublisher<ReverseGeoData, RequestError> {
+        
+        URLSession
+            .shared
+            .dataTaskPublisher(for: Endpoint.reverseGeoData(lat: lat, lng: lng).url)
+            .tryMap { (_data, _response) in
+                guard let statusCode = (_response as? HTTPURLResponse)?.statusCode else {
+                    throw RequestError.ConnectionFailed
+                }
+                
+                if statusCode == 429 {
+                    throw RequestError.RateLimitExceeded
+                } else if statusCode == 401 || statusCode == 403 {
+                    throw RequestError.AuthenticationFailed
+                } else if statusCode < 200 || statusCode > 299 {
+                    throw RequestError.ConnectionFailed
+                }
+                
+                return _data
+            }
+            .decode(type: ReverseGeoDataResponse.self, decoder: JSONDecoder())
+            .map({$0[0]})
+            .mapError { _urlError -> RequestError in
+                if let error = _urlError as? RequestError {
+                    return error
+                }
+                return RequestError.ConnectionFailed
+            }
+            .eraseToAnyPublisher()
+        
+    }
+    
     
 }
