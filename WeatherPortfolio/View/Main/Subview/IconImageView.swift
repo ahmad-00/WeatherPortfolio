@@ -12,7 +12,10 @@ class IconImageView: UIImageView {
     
     private var cancelable = Set<AnyCancellable>()
     
-    init() {
+    private var requestManager: RequestManagerProtocol
+    
+    init(requestManager: RequestManagerProtocol = RequestManager()) {
+        self.requestManager = requestManager
         super.init(frame: .zero)
     }
     
@@ -47,8 +50,7 @@ class IconImageView: UIImageView {
     }
     
     private func fetchImage(name: String) {
-        RequestManager
-            .shared
+        requestManager
             .getWeatherIcon(name: name)
             .receive(on: RunLoop.main)
             .sink(receiveCompletion: {_ in}) {[weak self] _data in

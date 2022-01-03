@@ -5,27 +5,8 @@
 //  Created by Ahmad Mohammadi on 12/18/21.
 //
 
-import Combine
 import Foundation
-
-// MARK: Errors
-enum RequestError: Error {
-    case ConnectionFailed
-    case RateLimitExceeded
-    case AuthenticationFailed
-    
-    var localizedDescription: String {
-        switch self {
-        case .ConnectionFailed:
-            return NSLocalizedString("Connection failed. please try again", comment: "")
-        case .RateLimitExceeded:
-            return NSLocalizedString("Api key rate limit exceeded", comment: "")
-        case .AuthenticationFailed:
-            return NSLocalizedString("Invalid key provided", comment: "")
-        }
-    }
-    
-}
+import Combine
 
 // MARK: URLS
 fileprivate enum Endpoint {
@@ -51,11 +32,7 @@ fileprivate enum Endpoint {
 
 
 
-class RequestManager {
-    
-    private init() {}
-    
-    public static let shared = RequestManager()
+class RequestManager: RequestManagerProtocol {
     
     func getWeatherIcon(name: String) -> AnyPublisher<Data?, URLError> {
         return URLSession

@@ -95,7 +95,7 @@ class MainView: UIViewController, TodayViewDelegate {
     
     func didTapCurrentLocation() {
         logger.debug("Did Received Delegate")
-        let searchVM = SearchVM()
+        let searchVM = SearchVM(requestManager: RequestManager())
         searchVM.delegate = viewModel
         let searchView = SearchView(viewModel: searchVM)
         searchView.modalPresentationStyle = .formSheet

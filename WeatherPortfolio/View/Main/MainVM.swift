@@ -14,7 +14,10 @@ class MainVM: NSObject {
     let weatherInfoWitLocation = CurrentValueSubject<(Weather, ReverseGeoData)?, Never>(nil)
     private var hourlyWeatherData = [CurrentInfo]()
     
-    override init() {
+    private var requestManager: RequestManagerProtocol
+    
+    init(requestManager: RequestManagerProtocol) {
+        self.requestManager = requestManager
         super.init()
         
         LocationManager
@@ -24,12 +27,10 @@ class MainVM: NSObject {
             .compactMap{ $0 }
             .first()
             .flatMap { _locationData in
-                RequestManager
-                    .shared
+                requestManager
                     .getWeatherInfo(lat: _locationData.lat, lng: _locationData.lng)
                     .zip(
-                        RequestManager
-                            .shared
+                        requestManager
                             .getLocationName(lat: _locationData.lat, lng: _locationData.lng)
                     )
             }
@@ -59,11 +60,9 @@ class MainVM: NSObject {
 
     private func fetchNewLocationWeatherData(locationData:Location) {
         Publishers.Zip (
-            RequestManager
-                .shared
+            requestManager
                 .getWeatherInfo(lat: locationData.lat, lng: locationData.lng),
-            RequestManager
-                .shared
+            requestManager
                 .getLocationName(lat: locationData.lat, lng: locationData.lng)
         )
             .map { _weatherInfo, _locationName in

@@ -6,12 +6,18 @@
 //
 
 import XCTest
+import Combine
 @testable import WeatherPortfolio
 
 class WeatherPortfolioTests: XCTestCase {
 
+    private var requestManager = RequestManager()
+    private var requestManagerMock = RequestManagerMock()
+    private var cancelable = Set<AnyCancellable>()
+    
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        
     }
 
     override func tearDownWithError() throws {
@@ -26,8 +32,7 @@ class WeatherPortfolioTests: XCTestCase {
     func testGetWeatherInfo() {
         
         let expectation = self.expectation(description: "GetWeatherInfoExpectation")
-        _ = RequestManager
-            .shared
+        _ = requestManager
             .getWeatherInfo(lat: 40.730610, lng: -73.935242)
             .subscribe(on: DispatchQueue.global(qos: .userInteractive))
             .receive(on: RunLoop.main)
@@ -52,7 +57,8 @@ class WeatherPortfolioTests: XCTestCase {
         
         let expectation = self.expectation(description: "GetLocationInfoExpectation")
         
-        _ = RequestManager.shared.getLocationName(lat: 40.730610, lng: -73.935242)
+        _ = requestManager
+            .getLocationName(lat: 40.730610, lng: -73.935242)
             .subscribe(on: RunLoop.main)
             .sink {_result in
                 switch _result {
@@ -73,9 +79,23 @@ class WeatherPortfolioTests: XCTestCase {
     
     
     func testMainViewModel() {
-        let vm = MainVM()
-//        vm.
+        let expectation = self.expectation(description: "MainViewModelExpectation")
+        let mainVM = MainVM(requestManager: requestManagerMock)
+        mainVM
+            .weatherInfoWitLocation
+            .receive(on: RunLoop.main)
+            .compactMap({$0})
+            .sink { (_weather, _reverseGeoData) in
+                XCTAssertEqual(_weather.current?.temp, 11.13)
+                expectation.fulfill()
+            }
+            .store(in: &cancelable)
         
+        LocationManager
+            .shared
+            .userLocation = Location(lat: 1.11, lng: 1.11)
+        
+        self.waitForExpectations(timeout: 8)
     }
 
     func testPerformanceExample() throws {

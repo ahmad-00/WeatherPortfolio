@@ -22,7 +22,10 @@ class SearchVM: NSObject, ObservableObject {
     
     private var searchTerm = PassthroughSubject<String, Never>()
     
-    override init() {
+    private var requestManager: RequestManagerProtocol
+    
+    init(requestManager: RequestManagerProtocol) {
+        self.requestManager = requestManager
         super.init()
         
         searchTerm
@@ -34,8 +37,7 @@ class SearchVM: NSObject, ObservableObject {
             }
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .flatMap({ _value in
-                RequestManager
-                    .shared
+                requestManager
                     .getGeoData(searchTerm: _value)
                     .catch { _error -> Just<[GeoData]?> in
                         print("=-=-=- Error =>", _error)
